@@ -134,7 +134,7 @@ function a4Text(
 /** Horizontal designs: medal, ribbon and slot moved right of the Canva position to clear long titles. */
 export const H_MEDAL_SHIFT_PX = 40;
 
-function medalGuides(g: 'h' | 'v', c: { ribbon: string; medal: string; slot: string; cut: string }): El[] {
+function medalGuides(g: 'h' | 'v', c: { ribbon: string; medal: string; slot: string; cut: string }, slotYPx = 76): El[] {
   if (g === 'h') {
     const dx = H_MEDAL_SHIFT_PX;
     return [
@@ -146,7 +146,7 @@ function medalGuides(g: 'h' | 'v', c: { ribbon: string; medal: string; slot: str
   return [
     { kind: 'rect', x: P(161), y: 0, w: P(94), h: P(150), fill: c.ribbon, guide: true },
     { kind: 'circle', cx: P(66 + 141.5), cy: P(130 + 141.5), r: P(141.5), fill: c.medal, guide: true },
-    { kind: 'rect', x: P(112), y: P(76), w: P(192), h: P(36), fill: c.slot, radius: P(18), guide: true, cutOutline: c.cut }
+    { kind: 'rect', x: P(112), y: P(slotYPx), w: P(192), h: P(36), fill: c.slot, radius: P(18), guide: true, cutOutline: c.cut }
   ];
 }
 
@@ -212,10 +212,12 @@ export const TEMPLATES: Template[] = [
   {
     id: 'a4-v-light', frame: 'a4', theme: 'light', label: 'Vertical map | Light',
     pageW: A4.w, pageH: A4.h, background: '#ffffff', font: A4_FONT, format: A4_FMT,
-    mapMm: { w: 80, h: 267 },
+    // 16 Nov 2026: map right edge extended 3 mm (80 -> 83 mm wide, left edge fixed);
+    // ribbon slot top aligned with the map top (slot y 76 px -> 57 px, i.e. 20.1 mm -> 15.1 mm).
+    mapMm: { w: 83, h: 267 },
     elements: [
-      { kind: 'map', x: P(412), y: P(57), w: 80, h: 267, placeholder: '#2b2b2b' },
-      ...medalGuides('v', { ribbon: '#2b2b2b', medal: '#e6e6e6', slot: '#0b0b0b', cut: '#c4c4c4' }),
+      { kind: 'map', x: P(412), y: P(57), w: 83, h: 267, placeholder: '#2b2b2b' },
+      ...medalGuides('v', { ribbon: '#2b2b2b', medal: '#e6e6e6', slot: '#0b0b0b', cut: '#c4c4c4' }, 57),
       { kind: 'rule', x: P(57), y: P(899.2), w: P(320), h: P(1.6), color: '#cccccc' },
       ...a4Text(LIGHT_A4, 'v', 924)
     ]
