@@ -134,13 +134,13 @@ function a4Text(
 /** Medal, ribbon strip and ribbon slot: on-screen guides only, never printed (the slot prints as a faded cut outline). */
 /**
  * Positions copied from Karthik's Canva design "Medal Frame A4 - Refined Type" on 16 Nov 2026 (Canva px, 96 px/in).
- * Slot size is the same everywhere: 192 x 36 px = 50.8 x 9.53 mm, full pill.
- *   Horizontal pages: slot 432.5, 54.8 | ribbon 468, 0, 121 x 167.8 | medal 302 px circle at 373, 130.8
+ * Slot size is the same everywhere: 192 x 36 px = 50.8 x 9.53 mm, full pill; slot top 57 px (15.1 mm) on every page.
+ *   Horizontal pages: slot 432.5, 57   | ribbon 468, 0, 121 x 167.8 | medal 302 px circle at 373, 130.8
  *   Vertical pages:   slot 112, 57     | ribbon 161, 0, 94 x 150    | medal 283 px circle at 66, 130
  */
 export const SLOT = { w: 192, h: 36, radius: 18 };
 const GUIDES = {
-  h: { slot: { x: 432.5, y: 54.8 }, ribbon: { x: 468, w: 121, h: 167.8 }, medal: { x: 373, y: 130.8, d: 302 } },
+  h: { slot: { x: 432.5, y: 57 }, ribbon: { x: 468, w: 121, h: 167.8 }, medal: { x: 373, y: 130.8, d: 302 } },
   v: { slot: { x: 112, y: 57 }, ribbon: { x: 161, w: 94, h: 150 }, medal: { x: 66, y: 130, d: 283 } }
 } as const;
 
