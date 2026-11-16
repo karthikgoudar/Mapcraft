@@ -100,11 +100,11 @@ function a4Text(
     return [
       T(76, 228.2, 260, 13, 700, o.sub, 'subtitle', 'left', 1.4, { upper: true, moveWithTitle: true }),
       // Title raised to make room for the name/bib stack. Container 72..360 x 218..330 px,
-      // >= 20 px (5 mm) clear of the medal circle (centre 531, 262; leftmost point x = 380 at y = 262).
+      // >= 13 px (3.4 mm) clear of the medal circle (centre 524, 281.8; leftmost point x = 373 at y = 281.8).
       { kind: 'title', x: P(72), y: P(218), w: P(288), h: P(112), refTop: P(250.2), maxSize: P(76), minSize: P(30), weight: 700, color: o.strong, lineHeight: 1.05 },
-      // Name wraps within 330 px so it stays >= 19 px clear of the medal circle (lowered 35 px on 16 Nov);
-      // 2-line name ends 17 px above the map
-      ...nameBlock(76, 350, 330),
+      // Name wraps within 310 px so a full-width first line stays >= 15 px clear of the medal circle
+      // (circle edge is at x = 401 at the name's top, y = 370); 2-line name ends 17 px above the map
+      ...nameBlock(76, 350, 310),
       T(76, footerTop, 140, 11, 400, o.label, { literal: 'DATE' }),
       T(226, footerTop, 140, 11, 400, o.label, { literal: 'FINISH TIME' }),
       T(376, footerTop, 140, 11, 400, o.label, { literal: 'DISTANCE' }),
@@ -117,7 +117,7 @@ function a4Text(
   }
   return [
     T(57, 478, 320, 13, 700, o.sub, 'subtitle', 'left', 1.4, { upper: true, moveWithTitle: true }),
-    // Container below the medal (medal ends at 394 px; subtitle stays above it)
+    // Container below the medal (medal ends at 413 px; subtitle stays above it)
     { kind: 'title', x: P(53), y: P(452), w: P(320), h: P(119.4), refTop: P(500), maxSize: P(68), minSize: P(30), weight: 700, color: o.strong, lineHeight: 1.05 },
     ...nameBlock(57, 614, 320),
     T(57, 924, 160, 11, 400, o.label, { literal: 'DATE' }),
@@ -132,34 +132,24 @@ function a4Text(
 }
 
 /** Medal, ribbon strip and ribbon slot: on-screen guides only, never printed (the slot prints as a faded cut outline). */
-/** Horizontal designs: medal, ribbon and slot moved right of the original Canva position to clear long titles (Canva matches since 16 Nov 2026). */
-export const H_MEDAL_SHIFT_PX = 40;
-
 /**
- * A4 ribbon slot standard (16 Nov 2026), same on every A4 design:
- *   size 192 x 36 px = 50.8 x 9.53 mm, corner radius 18 px
- *   top edge 57 px = 15.1 mm from the page top (level with the map top on Vertical | Light)
- *   medal guide top 18 px = 4.8 mm below the slot's bottom edge
+ * Positions copied from Karthik's Canva design "Medal Frame A4 - Refined Type" on 16 Nov 2026 (Canva px, 96 px/in).
+ * Slot size is the same everywhere: 192 x 36 px = 50.8 x 9.53 mm, full pill.
+ *   Horizontal pages: slot 432.5, 54.8 | ribbon 468, 0, 121 x 167.8 | medal 302 px circle at 373, 130.8
+ *   Vertical pages:   slot 112, 57     | ribbon 161, 0, 94 x 150    | medal 283 px circle at 66, 130
  */
-export const SLOT = { w: 192, h: 36, radius: 18, topPx: 57, medalGapPx: 18 };
-const MEDAL_TOP_PX = SLOT.topPx + SLOT.h + SLOT.medalGapPx; // 111 px
+export const SLOT = { w: 192, h: 36, radius: 18 };
+const GUIDES = {
+  h: { slot: { x: 432.5, y: 54.8 }, ribbon: { x: 468, w: 121, h: 167.8 }, medal: { x: 373, y: 130.8, d: 302 } },
+  v: { slot: { x: 112, y: 57 }, ribbon: { x: 161, w: 94, h: 150 }, medal: { x: 66, y: 130, d: 283 } }
+} as const;
 
 function medalGuides(g: 'h' | 'v', c: { ribbon: string; medal: string; slot: string; cut: string }): El[] {
-  const slot = (xPx: number): El =>
-    ({ kind: 'rect', x: P(xPx), y: P(SLOT.topPx), w: P(SLOT.w), h: P(SLOT.h), fill: c.slot, radius: P(SLOT.radius), guide: true, cutOutline: c.cut });
-  if (g === 'h') {
-    const dx = H_MEDAL_SHIFT_PX, r = 151;
-    return [
-      { kind: 'rect', x: P(431 + dx), y: 0, w: P(121), h: P(MEDAL_TOP_PX + 94), fill: c.ribbon, guide: true },
-      { kind: 'circle', cx: P(340 + r + dx), cy: P(MEDAL_TOP_PX + r), r: P(r), fill: c.medal, guide: true },
-      slot(395.5 + dx)
-    ];
-  }
-  const r = 141.5;
+  const G = GUIDES[g], r = G.medal.d / 2;
   return [
-    { kind: 'rect', x: P(161), y: 0, w: P(94), h: P(MEDAL_TOP_PX + 20), fill: c.ribbon, guide: true },
-    { kind: 'circle', cx: P(66 + r), cy: P(MEDAL_TOP_PX + r), r: P(r), fill: c.medal, guide: true },
-    slot(112)
+    { kind: 'rect', x: P(G.ribbon.x), y: 0, w: P(G.ribbon.w), h: P(G.ribbon.h), fill: c.ribbon, guide: true },
+    { kind: 'circle', cx: P(G.medal.x + r), cy: P(G.medal.y + r), r: P(r), fill: c.medal, guide: true },
+    { kind: 'rect', x: P(G.slot.x), y: P(G.slot.y), w: P(SLOT.w), h: P(SLOT.h), fill: c.slot, radius: P(SLOT.radius), guide: true, cutOutline: c.cut }
   ];
 }
 
