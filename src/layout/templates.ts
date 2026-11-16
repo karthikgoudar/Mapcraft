@@ -100,10 +100,11 @@ function a4Text(
     return [
       T(76, 228.2, 260, 13, 700, o.sub, 'subtitle', 'left', 1.4, { upper: true, moveWithTitle: true }),
       // Title raised to make room for the name/bib stack. Container 72..360 x 218..330 px,
-      // >= 20 px (5 mm) clear of the medal circle (leftmost point x = 380 at y = 227).
+      // >= 20 px (5 mm) clear of the medal circle (centre 531, 262; leftmost point x = 380 at y = 262).
       { kind: 'title', x: P(72), y: P(218), w: P(288), h: P(112), refTop: P(250.2), maxSize: P(76), minSize: P(30), weight: 700, color: o.strong, lineHeight: 1.05 },
-      // Name wraps within 400 px (clear of the medal's bottom tip); 2-line name ends 17 px above the map
-      ...nameBlock(76, 350, 400),
+      // Name wraps within 330 px so it stays >= 19 px clear of the medal circle (lowered 35 px on 16 Nov);
+      // 2-line name ends 17 px above the map
+      ...nameBlock(76, 350, 330),
       T(76, footerTop, 140, 11, 400, o.label, { literal: 'DATE' }),
       T(226, footerTop, 140, 11, 400, o.label, { literal: 'FINISH TIME' }),
       T(376, footerTop, 140, 11, 400, o.label, { literal: 'DISTANCE' }),
@@ -116,7 +117,7 @@ function a4Text(
   }
   return [
     T(57, 478, 320, 13, 700, o.sub, 'subtitle', 'left', 1.4, { upper: true, moveWithTitle: true }),
-    // Container below the medal (medal ends at 413 px; subtitle stays above it)
+    // Container below the medal (medal ends at 394 px; subtitle stays above it)
     { kind: 'title', x: P(53), y: P(452), w: P(320), h: P(119.4), refTop: P(500), maxSize: P(68), minSize: P(30), weight: 700, color: o.strong, lineHeight: 1.05 },
     ...nameBlock(57, 614, 320),
     T(57, 924, 160, 11, 400, o.label, { literal: 'DATE' }),
@@ -130,23 +131,35 @@ function a4Text(
   ];
 }
 
-/** Medal, ribbon strip and ribbon slot: on-screen guides only, never printed. */
-/** Horizontal designs: medal, ribbon and slot moved right of the Canva position to clear long titles. */
+/** Medal, ribbon strip and ribbon slot: on-screen guides only, never printed (the slot prints as a faded cut outline). */
+/** Horizontal designs: medal, ribbon and slot moved right of the original Canva position to clear long titles (Canva matches since 16 Nov 2026). */
 export const H_MEDAL_SHIFT_PX = 40;
 
-function medalGuides(g: 'h' | 'v', c: { ribbon: string; medal: string; slot: string; cut: string }, slotYPx = 76): El[] {
+/**
+ * A4 ribbon slot standard (16 Nov 2026), same on every A4 design:
+ *   size 192 x 36 px = 50.8 x 9.53 mm, corner radius 18 px
+ *   top edge 57 px = 15.1 mm from the page top (level with the map top on Vertical | Light)
+ *   medal guide top 18 px = 4.8 mm below the slot's bottom edge
+ */
+export const SLOT = { w: 192, h: 36, radius: 18, topPx: 57, medalGapPx: 18 };
+const MEDAL_TOP_PX = SLOT.topPx + SLOT.h + SLOT.medalGapPx; // 111 px
+
+function medalGuides(g: 'h' | 'v', c: { ribbon: string; medal: string; slot: string; cut: string }): El[] {
+  const slot = (xPx: number): El =>
+    ({ kind: 'rect', x: P(xPx), y: P(SLOT.topPx), w: P(SLOT.w), h: P(SLOT.h), fill: c.slot, radius: P(SLOT.radius), guide: true, cutOutline: c.cut });
   if (g === 'h') {
-    const dx = H_MEDAL_SHIFT_PX;
+    const dx = H_MEDAL_SHIFT_PX, r = 151;
     return [
-      { kind: 'rect', x: P(431 + dx), y: 0, w: P(121), h: P(170), fill: c.ribbon, guide: true },
-      { kind: 'circle', cx: P(340 + 151 + dx), cy: P(76 + 151), r: P(151), fill: c.medal, guide: true },
-      { kind: 'rect', x: P(395.5 + dx), y: P(22), w: P(192), h: P(36), fill: c.slot, radius: P(18), guide: true, cutOutline: c.cut }
+      { kind: 'rect', x: P(431 + dx), y: 0, w: P(121), h: P(MEDAL_TOP_PX + 94), fill: c.ribbon, guide: true },
+      { kind: 'circle', cx: P(340 + r + dx), cy: P(MEDAL_TOP_PX + r), r: P(r), fill: c.medal, guide: true },
+      slot(395.5 + dx)
     ];
   }
+  const r = 141.5;
   return [
-    { kind: 'rect', x: P(161), y: 0, w: P(94), h: P(150), fill: c.ribbon, guide: true },
-    { kind: 'circle', cx: P(66 + 141.5), cy: P(130 + 141.5), r: P(141.5), fill: c.medal, guide: true },
-    { kind: 'rect', x: P(112), y: P(slotYPx), w: P(192), h: P(36), fill: c.slot, radius: P(18), guide: true, cutOutline: c.cut }
+    { kind: 'rect', x: P(161), y: 0, w: P(94), h: P(MEDAL_TOP_PX + 20), fill: c.ribbon, guide: true },
+    { kind: 'circle', cx: P(66 + r), cy: P(MEDAL_TOP_PX + r), r: P(r), fill: c.medal, guide: true },
+    slot(112)
   ];
 }
 
@@ -213,11 +226,11 @@ export const TEMPLATES: Template[] = [
     id: 'a4-v-light', frame: 'a4', theme: 'light', label: 'Vertical map | Light',
     pageW: A4.w, pageH: A4.h, background: '#ffffff', font: A4_FONT, format: A4_FMT,
     // 16 Nov 2026: map right edge extended 3 mm (80 -> 83 mm wide, left edge fixed);
-    // ribbon slot top aligned with the map top (slot y 76 px -> 57 px, i.e. 20.1 mm -> 15.1 mm).
+    // ribbon slot top aligned with the map top (now the A4 standard, see SLOT).
     mapMm: { w: 83, h: 267 },
     elements: [
       { kind: 'map', x: P(412), y: P(57), w: 83, h: 267, placeholder: '#2b2b2b' },
-      ...medalGuides('v', { ribbon: '#2b2b2b', medal: '#e6e6e6', slot: '#0b0b0b', cut: '#c4c4c4' }, 57),
+      ...medalGuides('v', { ribbon: '#2b2b2b', medal: '#e6e6e6', slot: '#0b0b0b', cut: '#c4c4c4' }),
       { kind: 'rule', x: P(57), y: P(899.2), w: P(320), h: P(1.6), color: '#cccccc' },
       ...a4Text(LIGHT_A4, 'v', 924)
     ]
